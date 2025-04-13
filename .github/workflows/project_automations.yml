@@ -1,0 +1,38 @@
+name: Project automations
+
+on:
+  issues:
+    types:
+      - opened
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  issue_opened:
+    name: issue_opened
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: 'Move issue to Todo'
+        uses: leonsteinhaeuser/project-beta-automations@v2.1.0
+        with:
+          gh_token: ${{ secrets.PROJECT_PERMISSIONS_TOKEN }}
+          user: leonsteinhaeuser
+          project_id: ${{ secrets.PROJECT_ID }}
+          resource_node_id: ${{ github.event.issue.node_id }}
+          status_value: "Todo"
+
+  pr_opened:
+    name: pr_opened
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    steps:
+      - name: 'Move PR to "In Progress"'
+        uses: leonsteinhaeuser/project-beta-automations@v2.1.0
+        with:
+          gh_token: ${{ secrets.PROJECT_PERMISSIONS_TOKEN }}
+          user: leonsteinhaeuser
+          project_id: ${{ secrets.PROJECT_ID }}
+          resource_node_id: ${{ github.event.pull_request.node_id }}
+          status_value: "In Progress"
