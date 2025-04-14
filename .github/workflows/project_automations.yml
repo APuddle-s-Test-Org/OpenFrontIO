@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   #issues:
   #pull_request_review:
-  #types: [submitted, edited]
+    #types: [submitted, edited]
 
 jobs:
   pr-review-requested-changes:
@@ -22,30 +22,27 @@ jobs:
             query($organization: String! $proj_num: Int!) {
               organization(login: $organization){
                 projectV2(number: $proj_num) {
-          				id
-          				fields (first: 30) {
-          					nodes{
-          						... on ProjectV2Field {
-          							id
-          							name
-          						}
-          						... on ProjectV2SingleSelectField {
-          							id
-          							name
-          							options {
-          								id
-          								name
-          							}
-          						}
-          					}
-          				}
+                  id
+                  fields (first: 30) {
+                    nodes{
+                      ... on ProjectV2Field {
+                        id
+                        name
+                      }
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                          }
+                      }
+                    }
+                  }
                 }
               }
             }' -f organization=$ORGANIZATION -F proj_num=$PROJECT_NUMBER > project_data.json
-
-
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .id' project_data.json) >> $GITHUB_ENV
           echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_ENV
           echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
-          echo '::debug::$project_data.json'
