@@ -17,7 +17,7 @@ jobs:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ORGANIZATION: "OpenFrontIO"
           USER: "APuddle210"
-          PROJECT_NUMBER: 1
+          PROJECT_NUMBER: 6
         run: |
           gh api graphql -f query='
             query($user: String! $proj_num: Int!) {
