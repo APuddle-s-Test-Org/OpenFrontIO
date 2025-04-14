@@ -7,17 +7,19 @@ on:
     #types: [submitted, edited]
 
 jobs:
-  pr-review-requested-changes:
-    name: pr-changes-requested
+  final-review-changes-requested:
+    name: final-review-changes-requested
     runs-on: ubuntu-latest
-    # if: github.event_name == 'pull_request_review' && (github.event.action == 'submitted' || github.event.action == 'edited') && github.event.review.state == 'changes_requested'
+    # if: ${{ github.event_name == 'pull_request_review' && (github.event.action == 'submitted' || github.event.action == 'edited') && github.event.review.state == 'changes_requested' }}
     steps:
-      - name: Get project data
+      - name: set-inciting-data
         env:
+          PR_REVIEW_ID: ${{github.event.pull_request_review.review.node_id}}
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ORGANIZATION: "OpenFrontIO"
           USER: "APuddle210"
           PROJECT_NUMBER: 3
+      - name: Get-project-data
         run: |
           gh api graphql -f query='
             query($organization: String! $proj_num: Int!) {
@@ -70,7 +72,7 @@ jobs:
                   }
                 }
               }
-            }' -f organization=$ORGANIZATION -F proj_num=$PROJECT_NUMBER > project_data.json
+            }' -f organization = $(env.ORGANIZATION} -F proj_num = ${env.PROJECT_NUMBER} > project_data.json
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_OUTPUT
           echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_OUTPUT
           echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_OUTPUT
@@ -78,6 +80,3 @@ jobs:
           echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_OUTPUT
           echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_OUTPUT
           echo 'PM_ITEM_ID='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "PVTI_lADOC2jf2s4A2aRCzgZTfSc") | .id' project_data.json) >> $GITHUB_OUTPUT
-          
-          
-          echo $PROJECT_ID
