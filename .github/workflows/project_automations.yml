@@ -136,7 +136,7 @@ jobs:
             }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > items_data.json
           
           echo 'PM_ITEM_ID="PVTI_lADOC2jf2s4A2aRCzgZTfSc"' >> $GITHUB_ENV
-          echo 'PM_ITEM='toJSON( $(jq '.data.organization.projectV2.items.nodes[] | select(.id== "$PM_ITEM_ID") | .' items_data.json) >> $GITHUB_ENV
+          echo 'PM_ITEM='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "$PM_ITEM_ID") | .' items_data.json) >> $GITHUB_ENV
         #  echo 'PM_ITEM_TITLE='$(jq '.[] | select(.id== "$PM_ITEM_ID") | .content.title' $PM_ITEM) >> $GITHUB_ENV
         #  echo 'PM_ITEM_ISSUE_NUM='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "$PM_ITEM_ID") | .content.number' items_data.json) >> $GITHUB_ENV
         #  echo 'PM_ITEM_STATUS_OPTION_ID='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "$PM_ITEM_ID") | select(.fieldValues.nodes[].field.id== "$STATUS_FIELD_ID") | .fieldValues.nodes[].optionId' items_data.json) >> $GITHUB_ENV
