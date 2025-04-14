@@ -88,6 +88,12 @@ jobs:
                   items {
                     nodes {
                       id
+                      content {
+                        ... on Issue {
+                          title
+                          number
+                        }
+                      }
                       fieldValues(first: 30) {
                         nodes {
                           ... on ProjectV2ItemFieldPullRequestValue {
@@ -127,6 +133,7 @@ jobs:
                   }
                 }
               }
-            }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > project_data.json
-          echo 'LINKED_PR__ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'PM_ITEM_ID='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "PVTI_lADOC2jf2s4A2aRCzgZTfSc") | .id' project_data.json) >> $GITHUB_ENV
+            }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > items_data.json
+          
+          echo 'PM_ITEM_ID="PVTI_lADOC2jf2s4A2aRCzgZTfSc"' >> $GITHUB_ENV
+        # echo 'PM_ITEM_ID='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "PVTI_lADOC2jf2s4A2aRCzgZTfSc") | .id' project_data.json) >> $GITHUB_ENV
