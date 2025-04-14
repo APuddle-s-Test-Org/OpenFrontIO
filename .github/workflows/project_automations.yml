@@ -64,10 +64,8 @@ jobs:
                             }
                             field {
                               ... on ProjectV2Field {
-                                nodes {
-                                  id
-                                  name
-                                }
+                                id
+                                name
                               }
                             }
                           }
@@ -75,11 +73,9 @@ jobs:
                             id
                             optionId
                             field {
-                              ... on ProjectV2Field {
-                                nodes {
-                                  id
-                                  name
-                                }
+                              ... on ProjectV2SingleSelectField {
+                                id
+                                name
                               }
                             }
                           }
