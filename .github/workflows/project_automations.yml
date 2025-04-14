@@ -1,9 +1,10 @@
 name: Project automations
 
 on:
-  issues:
-  pull_request_review:
-    types: [submitted, edited]
+  workflow_dispatch:
+  #issues:
+  #pull_request_review:
+    #types: [submitted, edited]
 
 jobs:
   pr-review-requested-changes:
