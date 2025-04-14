@@ -24,11 +24,11 @@ jobs:
         run: |
           gh api graphql -f query='
             query($organization: String! $proj_num: Int!) {
-              organization(login: $organization){
+              organization(login: $organization) {
                 projectV2(number: $proj_num) {
                   id
                   fields (first: 30) {
-                    nodes{
+                    nodes {
                       ... on ProjectV2Field {
                         id
                         name
@@ -39,26 +39,26 @@ jobs:
                         options {
                           id
                           name
-                          }
+                        }
                       }
                     }
                   }
-                  items{
-                    nodes{
+                  items {
+                    nodes {
                       id
                       fieldValues(first: 30) {
-                        nodes{
+                        nodes {
                           ... on ProjectV2ItemFieldPullRequestValue {
                             pullRequests(last: 1) {
                               nodes {
                                 id
                                 reviews(last: 20) {
-                                 nodes {
-                                   author {
-                                     login
-                                   }
-                                   state
-                                 }
+                                  nodes {
+                                    author {
+                                      login
+                                    }
+                                    state
+                                  }
                                 }
                               }
                             }
@@ -73,7 +73,7 @@ jobs:
                   }
                 }
               }
-            }' -f organization = $(env.ORGANIZATION} -F proj_num = ${env.PROJECT_NUMBER} > project_data.json
+            }' -f organization = ${env.ORGANIZATION} -F proj_num = ${env.PROJECT_NUMBER} > project_data.json
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_OUTPUT
           echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_OUTPUT
           echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_OUTPUT
