@@ -5,6 +5,14 @@ on:
   #issues:
   #pull_request_review:
     #types: [submitted, edited]
+    
+env:
+  #PR_REVIEW_ID: ${{github.event.pull_request_review.review.node_id}}
+  #PR_REVIEW_ID: ""
+  GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+  ORGANIZATION: "OpenFrontIO"
+  USER: "APuddle210"
+  PROJECT_NUMBER: 3
 
 jobs:
   final-review-changes-requested:
@@ -12,13 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     # if: ${{ github.event_name == 'pull_request_review' && (github.event.action == 'submitted' || github.event.action == 'edited') && github.event.review.state == 'changes_requested' }}
     steps:
-      - name: set-inciting-data
-        env:
-          PR_REVIEW_ID: ${{github.event.pull_request_review.review.node_id}}
-          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          ORGANIZATION: "OpenFrontIO"
-          USER: "APuddle210"
-          PROJECT_NUMBER: 3
       - name: Get-project-data
         run: |
           gh api graphql -f query='
