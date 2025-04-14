@@ -40,11 +40,44 @@ jobs:
                       }
                     }
                   }
+                  items{
+                    nodes{
+                      id
+                      fieldValues(first: 30) {
+                        nodes{
+                          ... on ProjectV2ItemFieldPullRequestValue {
+                            pullRequests(last: 1) {
+                              nodes {
+                                id
+                                reviews(last: 20) {
+                                 nodes {
+                                   author {
+                                     login
+                                   }
+                                   state
+                                 }
+                                }
+                              }
+                            }
+                          }
+                          ... on ProjectV2ItemFieldSingleSelectValue {
+                            id
+                            optionId
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }' -f organization=$ORGANIZATION -F proj_num=$PROJECT_NUMBER > project_data.json
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_OUTPUT
+          echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_OUTPUT
+          echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_OUTPUT
           echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .id' project_data.json) >> $GITHUB_OUTPUT
           echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_OUTPUT
           echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_OUTPUT
+          echo 'PM_ITEM_ID='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "PVTI_lADOC2jf2s4A2aRCzgZTfSc") | .id' project_data.json) >> $GITHUB_OUTPUT
+          
+          
           echo $PROJECT_ID
