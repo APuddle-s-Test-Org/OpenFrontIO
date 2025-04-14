@@ -16,11 +16,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ORGANIZATION: "OpenFrontIO"
-          PROJECT_NUMBER: 3
+          USER: "APuddle210"
+          PROJECT_NUMBER: 1
         run: |
           gh api graphql -f query='
-            query($organization: String! $proj_num: Int!) {
-              organization(login: $organization){
+            query($user: String! $proj_num: Int!) {
+              user(login: $user){
                 projectV2(number: $proj_num) {
                   id
                   fields (first: 30) {
@@ -41,7 +42,7 @@ jobs:
                   }
                 }
               }
-            }' -f organization=$ORGANIZATION -F proj_num=$PROJECT_NUMBER > project_data.json
+            }' -f user=$USER -F proj_num=$PROJECT_NUMBER > project_data.json
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
           echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .id' project_data.json) >> $GITHUB_OUTPUT
           echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_OUTPUT
