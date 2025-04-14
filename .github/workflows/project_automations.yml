@@ -2,37 +2,50 @@ name: Project automations
 
 on:
   issues:
-    types:
-      - opened
-  pull_request:
-    types:
-      - opened
+  pull_request_review:
+    types: [submitted, edited]
 
 jobs:
-  issue_opened:
-    name: issue_opened
+  pr-review-requested-changes:
+    name: pr-changes-requested
     runs-on: ubuntu-latest
-    if: github.event_name == 'issues' && github.event.action == 'opened'
+    # if: github.event_name == 'pull_request_review' && (github.event.action == 'submitted' || github.event.action == 'edited') && github.event.review.state == 'changes_requested'
     steps:
-      - name: 'Move issue to Todo'
-        uses: leonsteinhaeuser/project-beta-automations@v2.1.0
-        with:
-          gh_token: ${{ secrets.PROJECT_PERMISSIONS_TOKEN }}
-          user: leonsteinhaeuser
-          project_id: ${{ secrets.PROJECT_ID }}
-          resource_node_id: ${{ github.event.issue.node_id }}
-          status_value: "Todo"
+      - name: Get project data
+        env:
+          GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          ORGANIZATION: "OpenFrontIO"
+          PROJECT_NUMBER: 3
+        run: |
+          gh api graphql -f query='
+            query($organization: String! $proj_num: Int!) {
+              organization(login: $organization){
+                projectV2(number: $proj_id) {
+          				id
+          				fields (first: 30) {
+          					nodes{
+          						... on ProjectV2Field {
+          							id
+          							name
+          						}
+          						... on ProjectV2SingleSelectField {
+          							id
+          							name
+          							options {
+          								id
+          								name
+          							}
+          						}
+          					}
+          				}
+                }
+              }
+            }' -f organization=$ORGANIZATION -F proj_num=PROJECT_NUMBER > project_data.json
 
-  pr_opened:
-    name: pr_opened
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action == 'opened'
-    steps:
-      - name: 'Move PR to "In Progress"'
-        uses: leonsteinhaeuser/project-beta-automations@v2.1.0
-        with:
-          gh_token: ${{ secrets.PROJECT_PERMISSIONS_TOKEN }}
-          user: leonsteinhaeuser
-          project_id: ${{ secrets.PROJECT_ID }}
-          resource_node_id: ${{ github.event.pull_request.node_id }}
-          status_value: "In Progress"
+
+          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
+          echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
+          
+
