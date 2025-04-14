@@ -62,10 +62,26 @@ jobs:
                                 }
                               }
                             }
+                            field {
+                              ... on ProjectV2Field {
+                                nodes {
+                                  id
+                                  name
+                                }
+                              }
+                            }
                           }
                           ... on ProjectV2ItemFieldSingleSelectValue {
                             id
                             optionId
+                            field {
+                              ... on ProjectV2Field {
+                                nodes {
+                                  id
+                                  name
+                                }
+                              }
+                            }
                           }
                         }
                       }
@@ -73,11 +89,15 @@ jobs:
                   }
                 }
               }
-            }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > project_data.json
-          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_OUTPUT
-          echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'FINAL_REVIEW_FLAG_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .id' project_data.json) >> $GITHUB_ENV
+            }' -f organization = ${{env.ORGANIZATION}} -F proj_num = ${{env.PROJECT_NUMBER}} > project_data.json
+          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
+          
+          echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'FINAL_REVIEW_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Final Review") |.id' project_data.json) >> $GITHUB_ENV
+          
+          echo 'FINAL_REVIEW_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .id' project_data.json) >> $GITHUB_ENV
           echo 'RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_ENV
+          
           echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'LINKED_PR__ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
           echo 'PM_ITEM_ID='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "PVTI_lADOC2jf2s4A2aRCzgZTfSc") | .id' project_data.json) >> $GITHUB_ENV
