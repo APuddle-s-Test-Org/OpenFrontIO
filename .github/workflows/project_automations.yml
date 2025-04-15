@@ -138,7 +138,12 @@ jobs:
           
           PM_ITEM_ID='"PVTI_lADOC2jf2s4A2aRCzgZTfSc"'
           PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID') | .' items_data.json)
-          approved_by_peers=$(jq '.fieldValues.nodes[] | select(.pullRequests?.nodes? != null) | .pullRequests.nodes[] | .reviews.nodes[] | select(.state == "APPROVED") | length' $PM_ITEM)
+          approved_by_peers_1=$(jq '.fieldValues.nodes[] | select(.pullRequests?.nodes? != null) | .pullRequests.nodes[]' $PM_ITEM)
+          approved_by_peers_2=$(jq '.reviews.nodes[] | select(.state == "APPROVED") | .' approved_by_peers_1)
+        #  approved_by_peers_3=$(jq ' |  | ' approved_by_peers_1)
+        #  length'
+        #  approved_by_peers_3=$(jq '.fieldValues.nodes[] | select(.pullRequests?.nodes? != null) | .pullRequests.nodes[] | .reviews.nodes[] | select(.state == "APPROVED") | length' $PM_ITEM)
+        #  approved_by_peers_4=$(jq '.fieldValues.nodes[] | select(.pullRequests?.nodes? != null) | .pullRequests.nodes[] | .reviews.nodes[] | select(.state == "APPROVED") | length' $PM_ITEM)
         #  approved_by_peers=$(jq '.[] | select(.login!= "evanpelle" && .state=="approved") | .' $PM_ITEM)
         #  approved_by_maint=$(jq '.[] | select(.login== '"evanpelle"' && .state=='"approved"') | .' $PM_ITEM)
           
