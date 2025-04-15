@@ -138,8 +138,8 @@ jobs:
           PM_ITEM_ID="PVTI_lADOC2jf2s4A2aRCzgZTfSc"
           echo 'PM_ITEM_1='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID') | .' items_data.json) >> $GITHUB_ENV
           echo 'PM_ITEM_2='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "$PM_ITEM_ID") | .' items_data.json) >> $GITHUB_ENV
-          echo 'PM_ITEM_3='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '${PM_ITEM_ID}') | .' items_data.json) >> $GITHUB_ENV
-          echo 'PM_ITEM_4='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "${PM_ITEM_ID}") | .' items_data.json) >> $GITHUB_ENV
+        #  echo 'PM_ITEM_3='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '${PM_ITEM_ID}') | .' items_data.json) >> $GITHUB_ENV
+        #  echo 'PM_ITEM_4='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== "${PM_ITEM_ID}") | .' items_data.json) >> $GITHUB_ENV
 
         # echo 'PM_ITEM_ID="${PM_ITEM_ID}"' >> $GITHUB_ENV  
         #  echo 'PM_ITEM_TITLE='$(jq '.[] | select(.id== "$PM_ITEM_ID") | .content.title' $PM_ITEM) >> $GITHUB_ENV
