@@ -138,12 +138,12 @@ jobs:
           
           PM_ITEM_ID='"PVTI_lADOC2jf2s4A2aRCzgZTfSc"'
           PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID') | .' items_data.json)
-          approved_by_peers=$(jq '.[] | select(.login!= '"evanpelle"' && .state=='"approved"') | .' $PM_ITEM)
-          approved_by_maint=$(jq '.[] | select(.login== '"evanpelle"' && .state=='"approved"') | .' $PM_ITEM)
+        #  approved_by_peers=$(jq '.[] | select(.login!= '"evanpelle"' && .state=='"approved"') | .' $PM_ITEM)
+        #  approved_by_maint=$(jq '.[] | select(.login== '"evanpelle"' && .state=='"approved"') | .' $PM_ITEM)
           
-          echo "PM_ITEM=$PM_ITEM" >> $GITHUB_ENV
-          echo "APPROVED_BY_PEERS=$approved_by_peers" >> $GITHUB_ENV
-          echo "APPROVED_BY_MAINT=$approved_by_maint" >> $GITHUB_ENV
+        #  echo "PM_ITEM=$PM_ITEM" >> $GITHUB_ENV
+        #  echo "APPROVED_BY_PEERS=$approved_by_peers" >> $GITHUB_ENV
+        #  echo "APPROVED_BY_MAINT=$approved_by_maint" >> $GITHUB_ENV
           
         #  approved_by_peers='$(jq '.data.organization.projectV2.items.nodes[] | select(.id== ${PM_ITEM_ID}) | .' items_data.json)
         #  echo 'PM_ITEM_TITLE='$(jq '.[] | select(.id== "$PM_ITEM_ID") | .content.title' $PM_ITEM) >> $GITHUB_ENV
