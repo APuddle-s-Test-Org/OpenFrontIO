@@ -137,7 +137,7 @@ jobs:
             }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > items_data.json
           
           PM_ITEM_ID='"PVTI_lADOC2jf2s4A2aRCzgZTfSc"'
-          PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID) | .' items_data.json)
+          PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID') | .' items_data.json)
           approved_by_peers=$(jq '.[] | select(.login!= "evanpelle" && .state=="approved") | .' items_data.json)
           approved_by_maint=$(jq '.[] | select(.login== "evanpelle" && .state=="approved") | .' items_data.json)
           
