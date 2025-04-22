@@ -178,7 +178,7 @@ export class PlayerView {
     return this.data.id;
   }
   team(): Team | null {
-    return this.data.team;
+    return this.data.team ?? null;
   }
   type(): PlayerType {
     return this.data.playerType;
@@ -240,6 +240,10 @@ export class PlayerView {
 
   profile(): Promise<PlayerProfile> {
     return this.game.worker.playerProfile(this.smallID());
+  }
+
+  bestTransportShipSpawn(targetTile: TileRef): Promise<TileRef | false> {
+    return this.game.worker.transportShipSpawn(this.id(), targetTile);
   }
 
   transitiveTargets(): PlayerView[] {
