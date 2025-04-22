@@ -67,7 +67,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
-          item_id="$( gh api graphql -f query=
+          item_id=$( gh api graphql -f query='
             mutation($project:ID!, $issue:ID!) {
               addProjectV2ItemByID(Input: {
                 projectId: $project,
@@ -77,5 +77,5 @@ jobs:
                   id
                 }
               }
-            }' -f project="${{env.PROJECT_ID}}" -f issue="${{env.ISSUE_ID}}")"
+            }' -f project=${{env.PROJECT_ID}} -f issue=${{env.ISSUE_ID}} --jq '.data.addProjectV2ItemById.item.id')
           echo 'ITEM_ID'=$item_id >> GITHUB_ENV
