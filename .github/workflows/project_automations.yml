@@ -1,16 +1,27 @@
 name: Project automations
 
+#Automation Cases:
+# New Issues go to Triage (maybe also new PRs)
+# Setting Concept Review Status to Approved updates status to Development, if status was Concept Review
+# Linking a PR to an Issue updates status to Peer Review, sets Concept Review Status to Skipped if it wasn't set to Approved already
+# 
+
+
 on:
   workflow_dispatch:
-  #issues:
-  #pull_request_review:
-    #types: [submitted, edited]
+  issues:
+    types: [opened, closed]
+  pull_request:
+    types: [review_requested, opened, closed]
+  pull_request_review:
+    types: [submitted, edited]
     
 env:
   ORGANIZATION: "APuddle-s-Test-Org"
   PROJECT_NUMBER: 1
-  #PR_REVIEW_ID: ${{github.event.pull_request_review.review.node_id}}
-  #PR_REVIEW_ID: ""
+  PR_REVIEW_ID: ${{github.event.pull_request_review.review.node_id}}
+  PR_ID: ${{github.event.pull_request.node_id}}
+  ISSUE_ID: ${{github.event.issue.node_id}}
   
 
 jobs:
@@ -86,6 +97,7 @@ jobs:
           
           echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
           
+          
       - name: Get-items-data
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
@@ -146,12 +158,11 @@ jobs:
               }
             }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > items_data.json
            
-          items_data_val=$(jq '.' items_data.json)
-          echo 'ITEMS_DATA'=$items_data_val >> $GITHUB_ENV
         #  PM_ITEM_ID='"PVTI_lADOC2jf2s4A2aRCzgZTfSc"'
-        #  PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID') | .' items_data.json)
-        #  approved_by_peers_1=$(echo "$PM_ITEM" | jq '[.fieldValues.nodes[] | select(has("pullRequests") and (.pullRequests.nodes | length > 0)) | .pullRequests.nodes[] | select(has("reviews") and (.reviews.nodes | length > 0)) | .reviews.nodes[] | select(.state == "APPROVED")]| length' )
+        #  PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== ' ${{env.PROJECT_NUMBER}} ') | .' items_data.json)
         #  echo 'PM_ITEM='$PM_ITEM >> $GITHUB_ENV
+        #  approved_by_peers_1=$(echo "$PM_ITEM" | jq '[.fieldValues.nodes[] | select(has("pullRequests") and (.pullRequests.nodes | length > 0)) | .pullRequests.nodes[] | select(has("reviews") and (.reviews.nodes | length > 0)) | .reviews.nodes[] | select(.state == "APPROVED")]| length' )
+        #  
         #  echo 'APPROVED_BY_PEERS='$approved_by_peers_1 >> $GITHUB_ENV
         
         #  echo "APPROVED_BY_MAINT=$approved_by_maint" >> $GITHUB_ENV
