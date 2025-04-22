@@ -6,7 +6,9 @@ on:
   #pull_request_review:
     #types: [submitted, edited]
     
-#env:
+env:
+  ORGANIZATION: "APuddle-s-Test-Org"
+  PROJECT_NUMBER: 1
   #PR_REVIEW_ID: ${{github.event.pull_request_review.review.node_id}}
   #PR_REVIEW_ID: ""
   
@@ -25,8 +27,6 @@ jobs:
       - name: Get-project-data
         env:
           GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-          ORGANIZATION: "APuddle-s-Test-Org"
-          PROJECT_NUMBER: 1
         run: |
           gh api graphql -f query='
             query($organization: String! $proj_num: Int!) {
