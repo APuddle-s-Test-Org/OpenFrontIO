@@ -1,0 +1,81 @@
+name: Add New Issues to Board
+
+#Automation Cases:
+# New Issues go to Triage (maybe also new PRs)
+# Setting Concept Review Status to Approved updates status to Development, if status was Concept Review
+# Linking a PR to an Issue updates status to Peer Review, sets Concept Review Status to Skipped if it wasn't set to Approved already
+# 
+
+
+on:
+  workflow_dispatch:
+  issues:
+    types: opened
+    
+env:
+  ORGANIZATION: "APuddle-s-Test-Org"
+  PROJECT_NUMBER: 1
+  ISSUE_ID: ${{github.event.issue.node_id}}
+  
+
+jobs:
+  Project-automations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate-token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Get-project-data
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          gh api graphql -f query='
+            query($organization: String! $proj_num: Int!) {
+              organization(login: $organization) {
+                projectV2(number: $proj_num) {
+                  id
+                  fields (first: 30) {
+                    nodes {
+                      ... on ProjectV2Field {
+                        id
+                        name
+                      }
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        name
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > project_data.json
+          echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
+          
+          echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'TRIAGE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Triage") |.id' project_data.json) >> $GITHUB_ENV
+          
+          echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
+      - name: Add-item-to-board
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          item_id=$( gh api graphql -f query=
+            mutation($project:ID!, $issue:ID!) {
+              addProjectV2ItemByID(Input: {
+                projectId: $project,
+                contentId: $issue
+              }) {
+                item {
+                  id
+                }
+              }
+            }' -f project=${{env.PROJECT_ID}} -f issue=${{env.ISSUE_ID}})
+          echo 'ITEM_ID'=$item_id >> GITHUB_ENV
