@@ -87,6 +87,8 @@ jobs:
           echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
           
       - name: Get-items-data
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
         run: |
           gh api graphql -f query='
             query($organization: String! $proj_num: Int!) {
