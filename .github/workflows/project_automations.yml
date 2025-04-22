@@ -9,18 +9,24 @@ on:
 env:
   #PR_REVIEW_ID: ${{github.event.pull_request_review.review.node_id}}
   #PR_REVIEW_ID: ""
-  GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-  ORGANIZATION: "OpenFrontIO"
-  USER: "APuddle210"
-  PROJECT_NUMBER: 3
+  
 
 jobs:
-  final-review-changes-requested:
-    name: final-review-changes-requested
+  Project-automations:
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name == 'pull_request_review' && (github.event.action == 'submitted' || github.event.action == 'edited') && github.event.review.state == 'changes_requested' }}
     steps:
+      - name: Generate-token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Get-project-data
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+          ORGANIZATION: "APuddle-s-Test-Org"
+          PROJECT_NUMBER: 1
         run: |
           gh api graphql -f query='
             query($organization: String! $proj_num: Int!) {
@@ -49,32 +55,34 @@ jobs:
           echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
           
           echo 'STATUS_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'CONCEPTUAL_DESIGN_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Conceptual Design") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'ACTIVE_DEVELOPMENT_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Active Development") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'TRIAGE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Triage") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'PRE_DEVELOPMENT_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Pre-Development") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'CONCEPT_REVIEW_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Concept Review") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'DEVELOPMENT_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Development") |.id' project_data.json) >> $GITHUB_ENV
           echo 'PEER_REVIEW_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Peer Review") |.id' project_data.json) >> $GITHUB_ENV
           echo 'FINAL_REVIEW_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Final Review") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'COMPLETE_MERGED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Complete - Merged") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'COMPLETE_DISCARDED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Complete - Discarded") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'STALLED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Stalled") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'COMPLETE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .options[] | select(.name=="Complete") |.id' project_data.json) >> $GITHUB_ENV
+
           
-          echo 'CONCEPTUAL_REVIEW_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'CONCEPT_INCOMPLETE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Concept Incomplete") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'CONCEPT_AWAITING_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Awaiting Concept Review") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'CONCEPT_APPROVED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Concept Approved") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'CONCEPT_REJECTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Concept Rejected") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'CONCEPT_SKIPPED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Concept Review Skipped") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'CONCEPTUAL_REVIEW_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'CONCEPT_INCOMPLETE_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Incomplete") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'CONCEPT_AWAITING_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Awaiting Review") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'CONCEPT_APPROVED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Accepted") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'CONCEPT_REJECTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Rejected") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'CONCEPT_SKIPPED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Conceptual Review - Flag") | .options[] | select(.name=="Skipped") |.id' project_data.json) >> $GITHUB_ENV
           
-          echo 'PEER_REVIEW_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'PEER_AWAITING_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="Awaiting Peer Review") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'PEER_ONE_APPROVED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="1/2 Peers Approved") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'PEER_ONE_REJECTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="1/2 Peers Rejected") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'PEER_APPROVED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="Approved by Peers") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'PEER_REJECTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="Rejected by Peers") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'PEER_REVIEW_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'PEER_AWAITING_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="Awaiting Review") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'PEER_UNDER_REVIEW_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="Under Review") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'PEER_APPROVED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="Accepted") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'PEER_REJECTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Peer Review - Flag") | .options[] | select(.name=="Rejected") |.id' project_data.json) >> $GITHUB_ENV
           
-          echo 'FINAL_REVIEW_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .id' project_data.json) >> $GITHUB_ENV
-          echo 'FINAL_AWAITING_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Awaiting Final Review") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'FINAL_RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Returned for Changes") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'FINAL_APPROVED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Approved - Final") |.id' project_data.json) >> $GITHUB_ENV
-          echo 'FINAL_REJECTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Rejected - Final") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'FINAL_REVIEW_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review Status") | .id' project_data.json) >> $GITHUB_ENV
+          echo 'FINAL_AWAITING_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Awaiting Review") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'FINAL_RETURNED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Changes Requested") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'FINAL_APPROVED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Accepted") |.id' project_data.json) >> $GITHUB_ENV
+          echo 'FINAL_REJECTED_OPTION_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Final Review - Flag") | .options[] | select(.name=="Rejected") |.id' project_data.json) >> $GITHUB_ENV
           
           echo 'LINKED_PR_FIELD_ID='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Linked pull requests") | .id' project_data.json) >> $GITHUB_ENV
           
@@ -135,12 +143,14 @@ jobs:
                 }
               }
             }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > items_data.json
-          
-          PM_ITEM_ID='"PVTI_lADOC2jf2s4A2aRCzgZTfSc"'
-          PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID') | .' items_data.json)
-          approved_by_peers_1=$(echo "$PM_ITEM" | jq '[.fieldValues.nodes[] | select(has("pullRequests") and (.pullRequests.nodes | length > 0)) | .pullRequests.nodes[] | select(has("reviews") and (.reviews.nodes | length > 0)) | .reviews.nodes[] | select(.state == "APPROVED")]| length' )
-          echo 'PM_ITEM='$PM_ITEM >> $GITHUB_ENV
-          echo 'APPROVED_BY_PEERS='$approved_by_peers_1 >> $GITHUB_ENV
+           
+          items_data=items_data.json
+          echo "ITEMS_DATA=$items_data" >> $GITHUB_ENV
+        #  PM_ITEM_ID='"PVTI_lADOC2jf2s4A2aRCzgZTfSc"'
+        #  PM_ITEM=$(jq '.data.organization.projectV2.items.nodes[] | select(.id== '$PM_ITEM_ID') | .' items_data.json)
+        #  approved_by_peers_1=$(echo "$PM_ITEM" | jq '[.fieldValues.nodes[] | select(has("pullRequests") and (.pullRequests.nodes | length > 0)) | .pullRequests.nodes[] | select(has("reviews") and (.reviews.nodes | length > 0)) | .reviews.nodes[] | select(.state == "APPROVED")]| length' )
+        #  echo 'PM_ITEM='$PM_ITEM >> $GITHUB_ENV
+        #  echo 'APPROVED_BY_PEERS='$approved_by_peers_1 >> $GITHUB_ENV
         #  echo "APPROVED_BY_MAINT=$approved_by_maint" >> $GITHUB_ENV
         
         #  approved_by_peers_1=$(jq '.fieldValues.nodes[] | select(.pullRequests?.nodes? != null) | .pullRequests.nodes[]' $PM_ITEM )
