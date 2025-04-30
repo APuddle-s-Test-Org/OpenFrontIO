@@ -36,7 +36,7 @@ jobs:
       - name: Get Status Field From JSON
         id: Get-Status-Field-From-JSON
         run: |
-          statusFieldId=$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' ${{ toJSON(env.fieldsJson) }} )
+          statusFieldId=${{ env.fieldsJson.data.organization.projectV2.fields["Status"].id }}
           echo "statusFieldId=$statusFieldId" >> $GITHUB_ENV
 
       - name: Check Result
