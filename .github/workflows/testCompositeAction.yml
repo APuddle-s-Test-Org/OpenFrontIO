@@ -36,7 +36,7 @@ jobs:
       - name: Check Result
         id: Check-Result
         run: |
-          statusFieldId = $(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' ${{ $env.fieldsJson }} )
+          statusFieldId = $(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' ${{ env.fieldsJson }} )
           echo "statusFieldId = $statusFieldId" >> $GITHUB_ENV
 
           env
