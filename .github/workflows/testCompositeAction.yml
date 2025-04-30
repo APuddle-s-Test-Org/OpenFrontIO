@@ -19,6 +19,9 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions
       - name: Get Field ID
         id: Get-Field-ID
         uses: ./.github/actions/getFieldNodeId
