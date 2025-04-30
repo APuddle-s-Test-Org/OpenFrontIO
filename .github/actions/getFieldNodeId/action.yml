@@ -1,0 +1,57 @@
+name: 'getFieldNodeId'
+description: 'Gets the NodeID of the Porject Field'
+inputs:
+  token: 
+    description: 'A GitHub App Token'
+    required: true
+  organization: 
+    description: 'Name of the Org which owns the Project the field exists within.'
+    required: true
+  project: 
+    description: 'The number of the project within which the field exists.'
+    required: true
+  field: 
+    description: 'The name of the field to return the NodeID of.'
+    required: true
+outputs:
+  nodeId:
+    description: 'The NodeID of the field'
+    value: ${{ steps.Get-Field-ID.outputs.field-id }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get Field ID
+      id: Get-Field-ID
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        ORGANIZATION: ${{ inputs.organization }}
+        PROJECT_NUMBER: ${{ inputs.project }}
+      run: |
+        gh api graphql -f query='
+          query($organization: String! $proj_num: Int!) {
+            organization(login: $organization) {
+              projectV2(number: $proj_num) {
+                id
+                fields (first: 30) {
+                  nodes {
+                    ... on ProjectV2Field {
+                      id
+                      name
+                    }
+                    ... on ProjectV2SingleSelectField {
+                      id
+                      name
+                      options {
+                        id
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}} > project_data.json
+        echo 'PROJECT_ID='$(jq '.data.organization.projectV2.id' project_data.json) >> $GITHUB_ENV
+
+        echo 'field-id='$(jq '.data.organization.projectV2.fields.nodes[] | select(.name== ${{ inputs.field }} | .id' project_daya.json) >> $GITHUB_OUTPUT
