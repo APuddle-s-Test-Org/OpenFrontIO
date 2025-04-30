@@ -17,8 +17,10 @@ outputs:
   nodeId:
     description: 'The NodeID of the field'
     value: ${{ steps.Get-Field-ID.outputs.field-id }}
-  fieldsJson:
-    value: ${{ steps.Get-Fields-JSON.outputs.fieldsJson }}
+  field-ids:
+    value: ${{ steps.Get-Fields-JSON.outputs.field-ids }}
+  field-options:
+    value: ${{ steps.Get-Fields-JSON.outputs.fields-options }}
 runs:
   using: "composite"
   steps:
@@ -89,4 +91,7 @@ runs:
                 }
               }
             }
-          }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}}) >> $GITHUB_OUTPUT
+          }' -f organization=${{env.ORGANIZATION}} -F proj_num=${{env.PROJECT_NUMBER}})
+          echo 'field-ids='$(jq '.data.organization.projectV2.fields.nodes[] | {"name": .name, "id": .id}' $fieldsJson) >> $GITHUB_OUTPUT
+          echo 'field-options='.data.organization.projectV2.fields.nodes[] | {name: .name, id: .id, "options": (if .options == null then null else [(.options[] | {name: .name, id: .id})] end)}' $fieldsJson >> $GITHUB_OUTPUT
+      #    echo 'field-options='$(jq '.data.organization.projectV2.fields.nodes[] | {(.name): (if .options == null then null else [(.options[] | {(.name): .id})] end)}' $fieldsJson >> $GITHUB_OUTPUT
