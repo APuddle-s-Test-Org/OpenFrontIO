@@ -31,8 +31,12 @@ jobs:
           project: ${{ env.PROJECT_NUMBER }}
           field: "Status"
       - run: echo fieldID=${{ steps.Get-Field-ID.outputs.nodeId }} >> GITHUB_ENV
-      - run: echo ${{ toJSON(fromJSON(steps.Get-Field-ID.outputs.fieldsJson)) }}
+      - run: echo fieldsJson=${{ fromJSON(steps.Get-Field-ID.outputs.fieldsJson) }}
       
       - name: Check Result
         id: Check-Result
-        run: env
+        run: |
+          statusFieldId = $(jq '.data.organization.projectV2.fields.nodes[] | select(.name== "Status") | .id' ${{ $env.fieldsJson }} )
+          echo "statusFieldId = $statusFieldId" >> $GITHUB_ENV
+
+          env
