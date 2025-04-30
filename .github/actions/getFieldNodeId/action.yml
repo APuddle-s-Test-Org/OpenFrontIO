@@ -66,7 +66,7 @@ runs:
         ORGANIZATION: ${{ inputs.organization }}
         PROJECT_NUMBER: ${{ inputs.project }}
       run: |
-        echo 'fieldsJson=(gh api graphql -f query='
+        echo 'fieldsJson='(gh api graphql -f query='
           query($organization: String! $proj_num: Int!) {
             organization(login: $organization) {
               projectV2(number: $proj_num) {
