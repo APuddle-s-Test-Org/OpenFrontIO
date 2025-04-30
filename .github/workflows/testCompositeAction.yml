@@ -1,7 +1,7 @@
 Name: Test Composite Action
 
 on: 
-  workglow_dispatch:
+  workflow_dispatch:
 
 env:
   ORGANIZATION: "APuddle-s-Test-Org"
